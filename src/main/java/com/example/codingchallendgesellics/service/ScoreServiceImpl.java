@@ -1,6 +1,5 @@
 package com.example.codingchallendgesellics.service;
 
-
 import org.springframework.boot.json.JsonParser;
 import org.springframework.boot.json.JsonParserFactory;
 import org.springframework.stereotype.Service;
@@ -13,7 +12,6 @@ import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 
-
 @Service
 public class ScoreServiceImpl implements ScoreService {
 
@@ -21,6 +19,28 @@ public class ScoreServiceImpl implements ScoreService {
             "=amazon-search-ui&mkt=1&q=";
     private static final String REQUEST_METHOD = "GET";
 
+    /**
+     *
+     * @param keyword
+     * @return
+     */
+    @Override
+    public int calculateScore(String keyword) {
+        int n = keyword.length();
+        boolean isContain;
+        int i = 0;
+        do {
+            isContain = isWordAutocompleted(keyword, keyword.substring(0, ++i).replace(" ", "%20"));
+        } while (i < n && !isContain);
+        return isContain ? (n - i + 1) * 100 / n : 0;
+    }
+
+    /**
+     *
+     * @param keyword
+     * @param currentSubStr
+     * @return
+     */
     @Override
     public boolean isWordAutocompleted(String keyword, String currentSubStr) {
         HttpURLConnection connection = null;
@@ -38,7 +58,7 @@ public class ScoreServiceImpl implements ScoreService {
             JsonParser jsonParser = JsonParserFactory.getJsonParser();
             List<String> suggestions = (List<String>) jsonParser.parseList(content.toString()).get(1);
             Optional isContain = suggestions.stream()
-                    .filter(el -> el.toUpperCase().startsWith(keyword.toUpperCase() + " "))
+                    .filter(el -> el.equalsIgnoreCase(keyword))
                     .findAny();
             return isContain.isPresent();
         } catch (IOException e) {
