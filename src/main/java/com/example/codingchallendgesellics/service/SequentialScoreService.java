@@ -13,10 +13,6 @@ public class SequentialScoreService implements ScoreService {
         this.amazonAPIClient = amazonAPIClient;
     }
 
-    /**
-     * @param keyword
-     * @return
-     */
     @Override
     public int calculateScore(String keyword) {
         int keywordLength = keyword.length();

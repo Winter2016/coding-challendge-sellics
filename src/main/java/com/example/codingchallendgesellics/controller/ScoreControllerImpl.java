@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.constraints.NotBlank;
 import javax.ws.rs.GET;
 import javax.ws.rs.QueryParam;
 import java.util.concurrent.CompletableFuture;
@@ -28,13 +27,6 @@ public class ScoreControllerImpl implements ScoreController {
         this.scoreService = scoreService;
     }
 
-    /**
-     * @param keyword
-     * @return
-     * @throws InterruptedException
-     * @throws ExecutionException
-     * @throws TimeoutException
-     */
     @Override
     @GET
     @RequestMapping(value = "/estimate", params = {"keyword!="})

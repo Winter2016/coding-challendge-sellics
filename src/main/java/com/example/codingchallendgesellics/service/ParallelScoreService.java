@@ -40,8 +40,8 @@ public class ParallelScoreService implements ScoreService {
                 .map(token -> (Callable<Void>) () -> {
                     if (!isDone) {
                         System.out.println("Call for token " + token + " is started");
-                        boolean isWordAutoCompleted = amazonAPIClient.isWordAutocompleted(keyword, token);
-                        if (isWordAutoCompleted) {
+                        boolean isWordAutocompleted = amazonAPIClient.isWordAutocompleted(keyword, token);
+                        if (isWordAutocompleted) {
                             compareAndSetShortestAutoCompleted(token.length());
                         } else {
                             compareAndSetLongestNotAutoCompleted(token.length());
