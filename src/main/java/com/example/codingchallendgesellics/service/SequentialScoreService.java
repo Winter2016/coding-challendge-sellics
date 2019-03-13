@@ -3,7 +3,7 @@ package com.example.codingchallendgesellics.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-@Service(value = "sequentialScoreService")
+@Service
 public class SequentialScoreService implements ScoreService {
 
     private final AmazonAPIClient amazonAPIClient;
@@ -23,5 +23,4 @@ public class SequentialScoreService implements ScoreService {
         } while (i < keywordLength && !isWordAutocompleted);
         return isWordAutocompleted ? (keywordLength - i + 1) * 100 / keywordLength : 0;
     }
-
 }

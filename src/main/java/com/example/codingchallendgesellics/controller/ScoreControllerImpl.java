@@ -5,13 +5,8 @@ import com.example.codingchallendgesellics.service.ScoreService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.QueryParam;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -22,15 +17,17 @@ public class ScoreControllerImpl implements ScoreController {
 
     private final ScoreService scoreService;
 
+    /**
+     * Here any of two Score Services can be injected
+     */
     @Autowired
-    public ScoreControllerImpl(@Qualifier(value = "sequentialScoreService") ScoreService scoreService) {
+    public ScoreControllerImpl(@Qualifier(value = "concurrentScoreService") ScoreService scoreService) {
         this.scoreService = scoreService;
     }
 
     @Override
-    @GET
-    @RequestMapping(value = "/estimate", params = {"keyword!="})
-    public KeywordScore getScore(@QueryParam("keyword") String keyword) throws InterruptedException,
+    @GetMapping(value = "/estimate", params = {"keyword"})
+    public KeywordScore getScore(@RequestParam("keyword") String keyword) throws InterruptedException,
             ExecutionException, TimeoutException {
         String spacedKeyword = keyword.replace('+', ' ');
         return CompletableFuture.supplyAsync(() -> {
@@ -39,8 +36,7 @@ public class ScoreControllerImpl implements ScoreController {
         }).get(10, TimeUnit.SECONDS);
     }
 
-    @ResponseStatus(value = HttpStatus.REQUEST_TIMEOUT,
-            reason = "The request failed due to a timeout. Try a shorter word")
+    @ResponseStatus(value = HttpStatus.REQUEST_TIMEOUT, reason = "The request failed due to a timeout. Try a shorter word")
     @ExceptionHandler(TimeoutException.class)
     private void handleTimeoutException() {
         //TODO add logging

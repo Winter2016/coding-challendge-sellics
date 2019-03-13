@@ -11,19 +11,18 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
-@Service(value = "parallelScoreService")
-public class ParallelScoreService implements ScoreService {
+@Service
+public class ConcurrentScoreService implements ScoreService {
 
     private final AmazonAPIClient amazonAPIClient;
 
-    private ExecutorService fixedThreadPool = Executors.newFixedThreadPool(4);
-    //TODO figure out limits
-    private volatile int shortestAutoCompleted = 999;
+    private ExecutorService fixedThreadPool = Executors.newWorkStealingPool(10);
+    private volatile int shortestAutoCompleted = Integer.MAX_VALUE;
     private volatile int longestNotAutoCompleted = 0;
     private volatile boolean isDone;
 
     @Autowired
-    public ParallelScoreService(AmazonAPIClient amazonAPIClient) {
+    public ConcurrentScoreService(AmazonAPIClient amazonAPIClient) {
         this.amazonAPIClient = amazonAPIClient;
     }
 
@@ -39,7 +38,6 @@ public class ParallelScoreService implements ScoreService {
         Set<Callable<Void>> callableSet = tokens.stream()
                 .map(token -> (Callable<Void>) () -> {
                     if (!isDone) {
-                        System.out.println("Call for token " + token + " is started");
                         boolean isWordAutocompleted = amazonAPIClient.isWordAutocompleted(keyword, token);
                         if (isWordAutocompleted) {
                             compareAndSetShortestAutoCompleted(token.length());
@@ -50,9 +48,6 @@ public class ParallelScoreService implements ScoreService {
                             isDone = true;
                         }
                     }
-//                    else {
-//                        System.out.println("Call for token " + token + " isn't started");
-//                    }
                     return null;
                 })
                 .collect(Collectors.toSet());
@@ -64,7 +59,7 @@ public class ParallelScoreService implements ScoreService {
             System.err.println("Couldn't calculate score because of: ");
             e.printStackTrace();
         } finally {
-            shortestAutoCompleted = 999;
+            shortestAutoCompleted = Integer.MAX_VALUE;
             longestNotAutoCompleted = 0;
             isDone = false;
         }
