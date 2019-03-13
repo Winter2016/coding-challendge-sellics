@@ -2,7 +2,7 @@ package com.example.codingchallendgesellics.service;
 
 import org.springframework.boot.json.JsonParser;
 import org.springframework.boot.json.JsonParserFactory;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -12,41 +12,17 @@ import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 
-@Service
-public class ScoreServiceImpl implements ScoreService {
-
+@Component
+public class AmazonAPIClient {
     private static final String REQUEST_URL = "https://completion.amazon.com/search/complete?search-alias=aps&client" +
             "=amazon-search-ui&mkt=1&q=";
     private static final String REQUEST_METHOD = "GET";
 
-    /**
-     *
-     * @param keyword
-     * @return
-     */
-    @Override
-    public int calculateScore(String keyword) {
-        int n = keyword.length();
-        boolean isContain;
-        int i = 0;
-        do {
-            isContain = isWordAutocompleted(keyword, keyword.substring(0, ++i).replace(" ", "%20"));
-        } while (i < n && !isContain);
-        return isContain ? (n - i + 1) * 100 / n : 0;
-    }
-
-    /**
-     *
-     * @param keyword
-     * @param currentSubStr
-     * @return
-     */
-    @Override
     public boolean isWordAutocompleted(String keyword, String currentSubStr) {
         HttpURLConnection connection = null;
         StringBuilder content = new StringBuilder();
         try {
-            URL url = new URL(REQUEST_URL + currentSubStr);
+            URL url = new URL(REQUEST_URL + currentSubStr.replace(" ", "%20"));
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod(REQUEST_METHOD);
             try (BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {

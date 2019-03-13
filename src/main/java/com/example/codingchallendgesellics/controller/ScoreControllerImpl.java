@@ -3,12 +3,14 @@ package com.example.codingchallendgesellics.controller;
 import com.example.codingchallendgesellics.model.KeywordScore;
 import com.example.codingchallendgesellics.service.ScoreService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.constraints.NotBlank;
 import javax.ws.rs.GET;
 import javax.ws.rs.QueryParam;
 import java.util.concurrent.CompletableFuture;
@@ -22,12 +24,11 @@ public class ScoreControllerImpl implements ScoreController {
     private final ScoreService scoreService;
 
     @Autowired
-    public ScoreControllerImpl(ScoreService scoreService) {
+    public ScoreControllerImpl(@Qualifier(value = "sequentialScoreService") ScoreService scoreService) {
         this.scoreService = scoreService;
     }
 
     /**
-     *
      * @param keyword
      * @return
      * @throws InterruptedException
@@ -36,7 +37,7 @@ public class ScoreControllerImpl implements ScoreController {
      */
     @Override
     @GET
-    @RequestMapping("/estimate")
+    @RequestMapping(value = "/estimate", params = {"keyword!="})
     public KeywordScore getScore(@QueryParam("keyword") String keyword) throws InterruptedException,
             ExecutionException, TimeoutException {
         String spacedKeyword = keyword.replace('+', ' ');
